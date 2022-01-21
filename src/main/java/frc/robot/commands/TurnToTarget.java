@@ -31,7 +31,7 @@ public class TurnToTarget extends PIDCommand {
         drive);
 
     getController().enableContinuousInput(-180, 180);
-
+    getController().setTolerance(1);
     // Set the controller tolerance - the delta tolerance ensures the robot is stationary at the
     // setpoint before it is considered as having reached the reference
     getController().setTolerance(DriveConstants.kTurnToleranceDeg, DriveConstants.kTurnRateToleranceDegPerS);

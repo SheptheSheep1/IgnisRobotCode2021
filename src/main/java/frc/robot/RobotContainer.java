@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -45,13 +46,12 @@ public class RobotContainer {
     m_drivetrain.setDefaultCommand(new RunCommand(() ->
     m_drivetrain.arcadeDrive(
       m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
-    
   }
       /*
     m_shooter.setDefaultCommand(new RunCommand(() ->
                   m_shooter.manualSpinMotor(
-                    m_driverController.getRightTriggerAxis()), m_shooter));
-                    */
+                    m_driverController.getRightTrigger()), m_shooter));
+                  */  
   /*
     m_intake.setDefaultCommand(new RunCommand(() -> 
                   m_intake.setIntake(
@@ -73,7 +73,7 @@ public class RobotContainer {
    */
   
   private void configureButtonBindings() {
-    
+    /*
     new JoystickButton(m_driverController, Button.kA.value)
         .whenHeld(
             new PIDCommand(new PIDController(.175, 0, .1),
@@ -83,7 +83,7 @@ public class RobotContainer {
             0,
             // Pipe output to turn robot
             output -> m_drivetrain.arcadeDrive(0.0, output), m_drivetrain));
-            
+            */
         new JoystickButton(m_driverController, Button.kB.value)
         .whenPressed(new TurnToTarget(0, m_drivetrain).withTimeout(5));
   
@@ -112,21 +112,22 @@ public class RobotContainer {
                 new JoystickButton(m_driverController, Button.kB.value)
                         .whileHeld(() -> m_hopper.toggleSolenoid(), m_hopper);
                         */
-/*
+
 //Shooter System
 //Shooter may work within button format possibly even better than the .defaultCommand framework implemented above
+/*
     new JoystickButton(m_driverController, Axis.kRightTrigger.value) 
       .whileHeld(() -> {
         m_shooter.manualSpinMotor(m_driverController.getLeftTriggerAxis());
       }, m_shooter);
     */
-    /*
-   final JoystickButton xboxButton1 = new JoystickButton(m_driverController, XboxController.Button.kStickLeft.value);       
-   
+    
+  // final JoystickButton xboxButton1 = new JoystickButton(m_driverController, XboxController.Button.kStickLeft.value);       
+   /*
 xboxButton1.whenPressed(new Drive(m_drivetrain) ,true);
     SmartDashboard.putData("Xbox Button 1", new Drive( m_drivetrain ) );
-
-    */
+*/
+    
  /*
     final JoystickButton xboxButton2 = new JoystickButton(m_driverController, XboxController.Button.kA.value);
     xboxButton2.whenPressed(new Shoot(m_shooter), true);
