@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.DriveToDistance;
+import frc.robot.commands.PIDShooter;
 import frc.robot.commands.TurnToTarget;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
@@ -84,8 +86,17 @@ public class RobotContainer {
             // Pipe output to turn robot
             output -> m_drivetrain.arcadeDrive(0.0, output), m_drivetrain));
             */
+        new JoystickButton(m_driverController, Button.kY.value)
+        .whenPressed(new RunCommand(() -> m_shooter.manualSpinMotor(0), m_shooter));
+
         new JoystickButton(m_driverController, Button.kB.value)
-        .whenPressed(new TurnToTarget(0, m_drivetrain).withTimeout(5));
+        .whenPressed(new PIDShooter(m_shooter).withTimeout(3));
+
+        new JoystickButton(m_driverController, Button.kA.value)
+        .whenPressed(new DriveToDistance(m_drivetrain).withTimeout(3));
+
+        new JoystickButton(m_driverController, Button.kX.value)
+        .whenPressed(new TurnToTarget(0, m_drivetrain).withTimeout(3));
   
     //Intake System
     /*

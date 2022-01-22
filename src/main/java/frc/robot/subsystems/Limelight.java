@@ -39,4 +39,11 @@ public class Limelight {
     public static double getTv() {
         return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
     }
+    public static double calcDistance() {
+        //((inches) target height - limelight height) / tan(limelight mounting angle + vertical offset by limelight)
+        double vertOffset = getTy();
+        //84 - 18 inch
+        //98.25 - 47.5 inch
+        return ((84 - 18) / Math.tan(30+vertOffset));
+    }
 }

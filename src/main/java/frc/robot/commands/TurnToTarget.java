@@ -14,8 +14,8 @@ import frc.robot.Constants.DriveConstants;
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class TurnToTarget extends PIDCommand {
-  Limelight m_limelight = new Limelight();
-  XboxController m_driverController = new XboxController(0);
+  //Limelight m_limelight = new Limelight();
+  //XboxController m_driverController = new XboxController(0);
   /** Creates a new TurnToTarget. */
   public TurnToTarget(double targetAngleDegrees, Drivetrain drive) {
     super(
@@ -40,6 +40,6 @@ public class TurnToTarget extends PIDCommand {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return getController().atSetpoint();
   }
 }

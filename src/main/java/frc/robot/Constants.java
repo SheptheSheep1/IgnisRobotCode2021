@@ -44,8 +44,27 @@ public static final class DriveConstants {
         public static final int shooterFirstPort = 9;
         public static final int shooterSecondPort = 12;
         public static final double kNeoRPM = 5880;
+
+        public static final double kMotorRadius = 0 * UnitConversionConstants.distanceConversionFactor;
+        public static final double kShooterAngle = 0 * UnitConversionConstants.angleConversionFactor;
+        public static final double kShooterHeight = 0 * UnitConversionConstants.distanceConversionFactor;
     }
 
+    public static class UnitConversionConstants {
+        public static final double angleConversionFactor = (Math.PI / 180); // angles to radians
+        public static final double distanceConversionFactor = 39.37; // inches to meters
+    }
+    public static final class PhysicsConstants {
+        public static final double gAcceleration = 386.09; // in inches per second squared
+    }
+    public static final class FieldConstants {
+        // All measurements are in inches
+        public static final double kInitiationLine = 120.0;
+        public static final double kTrenchToDriverStation = 200.0;
+        public static final double kInitiationLineToTrench = 80.0;
+        public static final double kTargetHeight = 98.25;
+        public static final double kOuterToInnerTarget = 29.25;
+    }
     public static final class IntakeConstants {
         public static final double kIntakeSpeed = 0.20;
         public static final int intakePort = 11;
