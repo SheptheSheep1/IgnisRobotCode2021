@@ -17,16 +17,17 @@ public class DriveToDistance extends PIDCommand {
   public DriveToDistance(Drivetrain drive) {
     super(
         // The controller that the command will use
-        new PIDController(0, 0, 0),
+        new PIDController(.1, 0, 0),
         // This should return the measurement
         Limelight::calcDistance,
         // This should return the setpoint (can also be a constant)
-        () -> 60,
+        () -> 100,
         // This uses the output
-        output -> drive.arcadeDrive(output, 0),
+        output -> drive.arcadeDrive(-output, 0),
           // Use the output here
         drive);
     // Use addRequirements() here to declare subsystem dependencies.
+    getController().setTolerance(10, 0);
     // Configure additional PID options by calling `getController` here.
   }
 

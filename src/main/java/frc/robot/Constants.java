@@ -42,7 +42,7 @@ public static final class DriveConstants {
 
     public static final class ShooterConstants {
         public static final int shooterFirstPort = 9;
-        public static final int shooterSecondPort = 12;
+        public static final int shooterSecondPort = 4;
         public static final double kNeoRPM = 5880;
 
         public static final double kMotorRadius = 0 * UnitConversionConstants.distanceConversionFactor;

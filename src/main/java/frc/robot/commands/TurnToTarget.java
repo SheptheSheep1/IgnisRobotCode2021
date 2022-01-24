@@ -20,7 +20,7 @@ public class TurnToTarget extends PIDCommand {
   public TurnToTarget(double targetAngleDegrees, Drivetrain drive) {
     super(
         // The controller that the command will use
-        new PIDController(.175, 0, .1),
+        new PIDController(.05, 0, .2),
         // Close loop on heading
         Limelight::getTx,
         // Set reference to target
@@ -31,10 +31,12 @@ public class TurnToTarget extends PIDCommand {
         drive);
 
     getController().enableContinuousInput(-180, 180);
-    getController().setTolerance(1);
+    //getController().setTolerance(1);
     // Set the controller tolerance - the delta tolerance ensures the robot is stationary at the
     // setpoint before it is considered as having reached the reference
-    getController().setTolerance(DriveConstants.kTurnToleranceDeg, DriveConstants.kTurnRateToleranceDegPerS);
+   getController().setTolerance(1, 0);
+   System.out.println(getController().calculate(Limelight.getTx(), targetAngleDegrees));
+   System.out.println(getController().toString());
   }
 
   // Returns true when the command should end.

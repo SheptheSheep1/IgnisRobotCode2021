@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -25,6 +26,8 @@ public class Drivetrain extends SubsystemBase {
   private final MotorControllerGroup m_right;
   private final MotorControllerGroup m_left;
 
+  private final Encoder encoder;
+
   //private boolean dtIsInverted;
 
   public Drivetrain() {
@@ -43,7 +46,8 @@ public class Drivetrain extends SubsystemBase {
 
     m_left.setInverted(true); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
     m_right.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-
+    
+    encoder = new Encoder(1, 2);
     //dtIsInverted = false;
 
     // flip so that motor output and sensor velocity are same polarity
@@ -51,7 +55,7 @@ public class Drivetrain extends SubsystemBase {
     m_rightMaster.setSensorPhase(false);
     m_leftSlave.setSensorPhase(false);
     m_rightSlave.setSensorPhase(false);
-
+    
     // set mode of motors
     
 
@@ -73,7 +77,48 @@ public class Drivetrain extends SubsystemBase {
     m_diffDrive.curvatureDrive(forward * DriveConstants.kDriveSpeed, turn * DriveConstants.kTurnSpeed, quickTurn);
   }
 
-  
+  public void baseDriveTo(double distance) {
+    m_leftMaster.setSelectedSensorPosition(0);
+    m_rightMaster.setSelectedSensorPosition(0);
+    if (Limelight.calcDistance() > distance) {
+      while (getAverageEncoderDistance() < distance ) {
+        m_diffDrive.arcadeDrive(.2, 0);
+      }
+    } else if (Limelight.calcDistance() < distance) {
+      while (getAverageEncoderDistance() > distance) {
+        m_diffDrive.arcadeDrive(-.2, 0);
+      }
+    }
+  }
+
+	public double getLeftEncoderPosition() {
+    // get rotations of encoder by dividing encoder counts by counts per rotation
+    double encoderRotations = m_leftMaster.getSelectedSensorPosition() / 2048;
+
+    // get rotations of wheel by diving rotations of encoder by gear ratio
+    double wheelRotations = encoderRotations / 8.4;
+
+    // get distance by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
+    double distance = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+
+		return distance;
+	}
+
+  public double getRightEncoderPosition() {
+    // get rotations of encoder by dividing encoder counts by counts per rotation
+    double encoderRotations = m_rightMaster.getSelectedSensorPosition() / 2048;
+
+    // get rotations of wheel by diving rotations of encoder by gear ratio
+    double wheelRotations = encoderRotations / 8.4;
+
+    // get distance by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
+    double distance = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+
+		return distance;
+  }
+  public double getAverageEncoderDistance() {
+    return (getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0;
+  }
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

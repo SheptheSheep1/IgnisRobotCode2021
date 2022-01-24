@@ -43,7 +43,7 @@ public class Limelight {
         //((inches) target height - limelight height) / tan(limelight mounting angle + vertical offset by limelight)
         double vertOffset = getTy();
         //84 - 18 inch
-        //98.25 - 47.5 inch
-        return ((84 - 18) / Math.tan(30+vertOffset));
+        //98.25 - 47.5
+        return ((84 - 18) / Math.tan(Math.toRadians(50+vertOffset)));
     }
 }

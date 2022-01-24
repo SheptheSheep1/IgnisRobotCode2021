@@ -18,7 +18,7 @@ public class Hopper extends SubsystemBase {
   //private final Solenoid m_hopperPiston;
 
   public Hopper() {
-    m_hopperMotor = new CANSparkMax(HopperConstants.hopperPort, MotorType.kBrushless);
+    m_hopperMotor = new CANSparkMax(12, MotorType.kBrushless);
     //m_hopperPiston = new Solenoid(HopperConstants.hopperSolenoid);
   }
 

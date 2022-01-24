@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 //import edu.wpi.first.wpilibj2.command.RunCommand;
-
+import frc.robot.subsystems.Limelight;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -62,6 +62,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Intake", RobotContainer.m_intake.m_intakeMotor.getBusVoltage());
     SmartDashboard.putNumber("Shooter", RobotContainer.m_shooter.m_master.getBusVoltage());
     SmartDashboard.putNumber("Hopper", RobotContainer.m_hopper.m_hopperMotor.getBusVoltage());
+    System.out.println(Limelight.calcDistance());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

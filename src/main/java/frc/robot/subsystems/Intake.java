@@ -24,6 +24,8 @@ public class Intake extends SubsystemBase {
   public void setIntake(double speed) {
     m_intakeMotor.set(speed);
   }
+
+
 /*
   public void retractIntake() {
     m_intakeSolenoid.toggle();

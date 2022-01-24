@@ -48,24 +48,25 @@ public class RobotContainer {
     m_drivetrain.setDefaultCommand(new RunCommand(() ->
     m_drivetrain.arcadeDrive(
       m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
-  }
+  
       /*
     m_shooter.setDefaultCommand(new RunCommand(() ->
                   m_shooter.manualSpinMotor(
                     m_driverController.getRightTrigger()), m_shooter));
-                  */  
-  /*
-    m_intake.setDefaultCommand(new RunCommand(() -> 
+                  */ 
+                  /*
+      m_intake.setDefaultCommand(new RunCommand(() -> 
                   m_intake.setIntake(
-                    m_driverController.getLeftTriggerAxis()), m_intake));
-              */    
-              /*
+                    m_driverController.getLeftY()), m_intake));
+              */ 
+             /*
     m_hopper.setDefaultCommand(new RunCommand(() ->
-                        m_hopper.setHopper(m_driverController.getLeftTriggerAxis()), m_hopper));
-     Configure the button bindings
-    /*
-    
+                        m_hopper.setHopper(m_driverController.getLeftY()), m_hopper));
+*/
+    // Configure the button bindings
+  
   }
+  
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -86,18 +87,27 @@ public class RobotContainer {
             // Pipe output to turn robot
             output -> m_drivetrain.arcadeDrive(0.0, output), m_drivetrain));
             */
+            /*
         new JoystickButton(m_driverController, Button.kY.value)
         .whenPressed(new RunCommand(() -> m_shooter.manualSpinMotor(0), m_shooter));
-
+        */
+/*
         new JoystickButton(m_driverController, Button.kB.value)
         .whenPressed(new PIDShooter(m_shooter).withTimeout(3));
-
+*/
         new JoystickButton(m_driverController, Button.kA.value)
         .whenPressed(new DriveToDistance(m_drivetrain).withTimeout(3));
 
         new JoystickButton(m_driverController, Button.kX.value)
         .whenPressed(new TurnToTarget(0, m_drivetrain).withTimeout(3));
-  
+        
+        new JoystickButton(m_driverController, Button.kLeftBumper.value)
+        .whenPressed(new RunCommand(() -> m_intake.setIntake(-.2), m_intake))
+        .whenReleased(new RunCommand(() -> m_intake.setIntake(0), m_intake));
+        
+        new JoystickButton(m_driverController, Button.kY.value)
+        .whenPressed(new RunCommand(() -> m_drivetrain.baseDriveTo(100)));
+
     //Intake System
     /*
     new JoystickButton(m_driverController, Button.kB.value)
@@ -124,41 +134,6 @@ public class RobotContainer {
                         .whileHeld(() -> m_hopper.toggleSolenoid(), m_hopper);
                         */
 
-//Shooter System
-//Shooter may work within button format possibly even better than the .defaultCommand framework implemented above
-/*
-    new JoystickButton(m_driverController, Axis.kRightTrigger.value) 
-      .whileHeld(() -> {
-        m_shooter.manualSpinMotor(m_driverController.getLeftTriggerAxis());
-      }, m_shooter);
-    */
-    
-  // final JoystickButton xboxButton1 = new JoystickButton(m_driverController, XboxController.Button.kStickLeft.value);       
-   /*
-xboxButton1.whenPressed(new Drive(m_drivetrain) ,true);
-    SmartDashboard.putData("Xbox Button 1", new Drive( m_drivetrain ) );
-*/
-    
- /*
-    final JoystickButton xboxButton2 = new JoystickButton(m_driverController, XboxController.Button.kA.value);
-    xboxButton2.whenPressed(new Shoot(m_shooter), true);
-    SmartDashboard.putData("Xbox Button 2", new Shoot(m_shooter));
-    */
-    /*
-    final JoystickButton xboxButton2 = new JoystickButton(m_driverController, );
-    xboxButton2.whenPressed(new Shoot(m_shooter), true);
-    */
-   /*
-   final JoystickButton aButton = new JoystickButton(m_driverController, XboxConstants.intakeValue)
-   .whileHeld(() -> {
-           m_intake.setIntake(IntakeConstants.kIntakeSpeed);
-           m_hopper.setHopper(HopperConstants.kHopperSpeed);
-   }, m_intake, m_hopper)
-   .whenReleased(() -> {
-         DE  m_intake.setIntake(0);
-           m_hopper.setHopper(0);
-   }, m_intake, m_hopper);
-*/
   }
 
   /**
