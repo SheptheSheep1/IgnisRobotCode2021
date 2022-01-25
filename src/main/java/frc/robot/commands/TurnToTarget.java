@@ -26,7 +26,7 @@ public class TurnToTarget extends PIDCommand {
         // Set reference to target
         targetAngleDegrees,
         // Pipe output to turn robot
-        output -> drive.arcadeDrive(0.0, -output),
+        output -> drive.arcadeDrive(0.0, output),
         // Require the drive
         drive);
 

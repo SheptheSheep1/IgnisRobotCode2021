@@ -26,7 +26,7 @@ public class Drivetrain extends SubsystemBase {
   private final MotorControllerGroup m_right;
   private final MotorControllerGroup m_left;
 
-  private final Encoder encoder;
+  //private final Encoder encoder;
 
   //private boolean dtIsInverted;
 
@@ -44,10 +44,10 @@ public class Drivetrain extends SubsystemBase {
     m_leftSlave.follow(m_leftMaster);
     m_rightSlave.follow(m_rightMaster);
 
-    m_left.setInverted(true); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    m_right.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    m_left.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    m_right.setInverted(true);// CHANGE THESE UNTIL ROBOT DRIVES FORWARD
     
-    encoder = new Encoder(1, 2);
+    //encoder = new Encoder(1, 2);
     //dtIsInverted = false;
 
     // flip so that motor output and sensor velocity are same polarity

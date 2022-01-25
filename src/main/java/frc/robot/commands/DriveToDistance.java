@@ -17,7 +17,7 @@ public class DriveToDistance extends PIDCommand {
   public DriveToDistance(Drivetrain drive) {
     super(
         // The controller that the command will use
-        new PIDController(.1, 0, 0),
+        new PIDController(.05, 0, 0),
         // This should return the measurement
         Limelight::calcDistance,
         // This should return the setpoint (can also be a constant)
