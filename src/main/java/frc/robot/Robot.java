@@ -8,7 +8,6 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -25,7 +24,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   //private final DifferentialDrive diffDrive;
   private RobotContainer m_robotContainer;
-  private XboxController m_driverController;
   /**
    * This function is run when the robot is first started up and should be used
    * for any initialization code.
@@ -58,11 +56,12 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Joystick Y value", RobotContainer.m_driverController.getLeftY());
     SmartDashboard.putNumber("Joystick rTrigger", RobotContainer.m_driverController.getRightTriggerAxis());
     SmartDashboard.putNumber("Joystick lTrigger", RobotContainer.m_driverController.getLeftTriggerAxis());
-    SmartDashboard.putData("DriveTrain", RobotContainer.m_drivetrain);
-    SmartDashboard.putNumber("Intake", RobotContainer.m_intake.m_intakeMotor.getBusVoltage());
-    SmartDashboard.putNumber("Shooter", RobotContainer.m_shooter.m_master.getBusVoltage());
-    SmartDashboard.putNumber("Hopper", RobotContainer.m_hopper.m_hopperMotor.getBusVoltage());
-    System.out.println(Limelight.calcDistance());
+    //SmartDashboard.putData("DriveTrain", RobotContainer.m_drivetrain);
+    //SmartDashboard.putNumber("Intake", RobotContainer.m_intake.m_intakeMotor.getBusVoltage());
+    //SmartDashboard.putNumber("Shooter", RobotContainer.m_shooter.m_master.getBusVoltage());
+    //SmartDashboard.putNumber("Hopper", RobotContainer.m_hopper.m_hopperMotor.getBusVoltage());
+    SmartDashboard.putNumber("Limelight Calculated Distance" , Limelight.calcDistance());
+    SmartDashboard.putBoolean("LimelightHasValidTarget", Limelight.isTarget());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

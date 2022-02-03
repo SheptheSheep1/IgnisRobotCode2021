@@ -25,7 +25,7 @@ public class Limelight {
         NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setNumber(num);
     }
     public static boolean isTarget() {
-		return NetworkTableInstance.getDefault().getEntry("tv").getDouble(0) == 1;
+		return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0) == 1;
 	}
     public static double getTx() {
         return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);

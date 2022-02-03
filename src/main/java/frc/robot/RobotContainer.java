@@ -4,18 +4,18 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.XboxController.Button;
-import edu.wpi.first.wpilibj2.command.PIDCommand;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.Auto;
 import frc.robot.commands.DriveToDistance;
-import frc.robot.commands.PIDShooter;
 import frc.robot.commands.TurnToTarget;
+import frc.robot.commands.TurnToTargetProfiled;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
@@ -38,16 +38,22 @@ public class RobotContainer {
   public static final Hopper m_hopper = new Hopper();
   private static RobotContainer m_robotContainer = new RobotContainer();
   public static final Limelight m_limelight = new Limelight();
+  SendableChooser<Command> m_chooser = new SendableChooser<>();
+  private final Command m_auto = new Auto(m_drivetrain, m_shooter);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    
-    
+
     configureButtonBindings();
    
+    m_chooser.setDefaultOption("Autonomous", m_auto);
+
+    // Put the chooser on the dashboard
+    Shuffleboard.getTab("Autonomous").add(m_chooser);
+
     m_drivetrain.setDefaultCommand(new RunCommand(() ->
     m_drivetrain.arcadeDrive(
-      -m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
+      m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
   
       /*
     m_shooter.setDefaultCommand(new RunCommand(() ->
@@ -96,11 +102,14 @@ public class RobotContainer {
         .whenPressed(new PIDShooter(m_shooter).withTimeout(3));
 */
         new JoystickButton(m_driverController, Button.kA.value)
-        .whenPressed(new DriveToDistance(m_drivetrain).withTimeout(3));
+        .whenPressed(new DriveToDistance(100, m_drivetrain).withTimeout(3));
 
         new JoystickButton(m_driverController, Button.kX.value)
         .whenPressed(new TurnToTarget(0, m_drivetrain).withTimeout(3));
-        
+      /*
+        new JoystickButton(m_driverController, Button.kX.value)
+        .whenPressed(new TurnToTargetProfiled(0, m_drivetrain));
+        */
         new JoystickButton(m_driverController, Button.kLeftBumper.value)
         .whenPressed(new RunCommand(() -> m_intake.setIntake(-.2), m_intake))
         .whenReleased(new RunCommand(() -> m_intake.setIntake(0), m_intake));
@@ -140,15 +149,6 @@ public class RobotContainer {
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
-   */
-  /*
-  public Command getDrive() {
-    return m_drive;
-  }
-  
-  public Command getShoot() {
-    return m_shoot;
-  }
   */
   public static XboxController getXboxController() {
     return m_driverController;
@@ -157,5 +157,7 @@ public class RobotContainer {
   public static RobotContainer getInstance() {
     return m_robotContainer;
   }
-
+  public Command getAutonomousCommand() {
+    return m_chooser.getSelected();
+  }
 }

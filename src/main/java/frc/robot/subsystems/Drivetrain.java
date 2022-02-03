@@ -5,20 +5,19 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 //import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 public class Drivetrain extends SubsystemBase {
   /** Creates a new Drivetrain. */
   private final WPI_TalonFX m_leftMaster, m_rightMaster, m_leftSlave, m_rightSlave;
-  private final XboxController m_driverController = new XboxController(0);
   //private final SupplyCurrentLimitConfiguration m_currentLimitConfig;
 
   private final DifferentialDrive m_diffDrive;
@@ -26,15 +25,20 @@ public class Drivetrain extends SubsystemBase {
   private final MotorControllerGroup m_right;
   private final MotorControllerGroup m_left;
 
-  //private final Encoder encoder;
+  PIDController left_pid;
+  PIDController right_pid;
 
-  //private boolean dtIsInverted;
-
+  SimpleMotorFeedforward feedforward;
   public Drivetrain() {
     m_leftMaster = new WPI_TalonFX(DriveConstants.dtFrontLeftPort);
     m_rightMaster = new WPI_TalonFX(DriveConstants.dtFrontRightPort);
     m_leftSlave = new WPI_TalonFX(DriveConstants.dtBackLeftPort);
     m_rightSlave = new WPI_TalonFX(DriveConstants.dtBackRightPort);
+
+     left_pid = new PIDController(0, 0, 0);
+     right_pid = new PIDController(0, 0, 0);
+
+     feedforward = new SimpleMotorFeedforward(1, 0, 0);
 
         m_left = new MotorControllerGroup(m_leftMaster, m_leftSlave);
         m_right = new MotorControllerGroup(m_rightMaster, m_rightSlave);
@@ -44,12 +48,9 @@ public class Drivetrain extends SubsystemBase {
     m_leftSlave.follow(m_leftMaster);
     m_rightSlave.follow(m_rightMaster);
 
-    m_left.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    m_right.setInverted(true);// CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    m_left.setInverted(true); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    m_right.setInverted(false);// CHANGE THESE UNTIL ROBOT DRIVES FORWARD
     
-    //encoder = new Encoder(1, 2);
-    //dtIsInverted = false;
-
     // flip so that motor output and sensor velocity are same polarity
     m_leftMaster.setSensorPhase(false);
     m_rightMaster.setSensorPhase(false);
@@ -90,6 +91,11 @@ public class Drivetrain extends SubsystemBase {
       }
     }
   }
+  
+  public void tankDriveWithPIDF(double rightVelocitySetpoint, double leftVelocitySetpoint) {
+    m_left.setVoltage(feedforward.calculate(leftVelocitySetpoint) + left_pid.calculate(getLeftEncoderRate(), leftVelocitySetpoint));
+    m_right.setVoltage(feedforward.calculate(rightVelocitySetpoint) + right_pid.calculate(getRightEncoderRate(), rightVelocitySetpoint));
+  }
 
 	public double getLeftEncoderPosition() {
     // get rotations of encoder by dividing encoder counts by counts per rotation
@@ -116,6 +122,36 @@ public class Drivetrain extends SubsystemBase {
 
 		return distance;
   }
+  public double getRightEncoderRate() {
+		// get rotations of encoder by dividing encoder counts by counts per rotation
+    double encoderRotations = m_rightMaster.getSelectedSensorVelocity() / 2048;
+
+    // get rotations of wheel by diving rotations of encoder by gear ratio
+    double wheelRotations = encoderRotations / 8.4;
+
+    // get velocity by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
+    double velocity = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+
+    // get distance per second by multiplying by 10; getSelectedSensorVelocity sends distance back per 100ms
+    velocity *= 10;
+
+    return velocity;
+	}
+  public double getLeftEncoderRate() {
+    // get rotations of encoder by dividing encoder counts by counts per rotation
+    double encoderRotations = m_leftMaster.getSelectedSensorVelocity() / 2048;
+
+    // get rotations of wheel by diving rotations of encoder by gear ratio
+    double wheelRotations = encoderRotations / 8.4;
+
+    // get velocity by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
+    double velocity = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+
+    // get distance per second by multiplying by 10; getSelectedSensorVelocity sends distance back per 100ms
+    velocity *= 10;
+
+		return velocity;
+	}
   public double getAverageEncoderDistance() {
     return (getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0;
   }

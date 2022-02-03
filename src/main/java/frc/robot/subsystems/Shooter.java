@@ -33,6 +33,7 @@ private final CANSparkMax m_slave;
   public void manualSpinMotor(double speed) {
     m_master.set(speed);
   }
+
   public double calcVeloPerDistance(double distance) {
     double o = ShooterConstants.kShooterAngle * UnitConversionConstants.angleConversionFactor;
     double g = PhysicsConstants.gAcceleration;

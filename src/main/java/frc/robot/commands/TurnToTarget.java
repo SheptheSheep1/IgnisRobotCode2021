@@ -5,11 +5,9 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Limelight;
-import frc.robot.Constants.DriveConstants;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
@@ -20,23 +18,24 @@ public class TurnToTarget extends PIDCommand {
   public TurnToTarget(double targetAngleDegrees, Drivetrain drive) {
     super(
         // The controller that the command will use
-        new PIDController(.05, 0, .2),
+        new PIDController(.05, .03, .25),
         // Close loop on heading
         Limelight::getTx,
         // Set reference to target
         targetAngleDegrees,
         // Pipe output to turn robot
-        output -> drive.arcadeDrive(0.0, output),
+        output -> drive.arcadeDrive(0.0, -output),
         // Require the drive
         drive);
 
     getController().enableContinuousInput(-180, 180);
+    
     //getController().setTolerance(1);
     // Set the controller tolerance - the delta tolerance ensures the robot is stationary at the
     // setpoint before it is considered as having reached the reference
    getController().setTolerance(1, 0);
-   System.out.println(getController().calculate(Limelight.getTx(), targetAngleDegrees));
-   System.out.println(getController().toString());
+   //System.out.println(getController().calculate(Limelight.getTx(), targetAngleDegrees));
+   //System.out.println(getController().toString());
   }
 
   // Returns true when the command should end.
