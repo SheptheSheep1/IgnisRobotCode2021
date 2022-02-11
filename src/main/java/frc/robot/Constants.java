@@ -4,6 +4,15 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -34,10 +43,21 @@ public static final class DriveConstants {
          public static final double kDriveSpeed = .6;
          public static final double kTurnSpeed = .6;
 
-         public static final double cDriveSpeed = .1;
-         public static final double cTurnSpeed = .1;
+         public static final double cDriveSpeed = .6;
+         public static final double cTurnSpeed = .6;
          public static final double kTurnToleranceDeg = 0;
          public static final double kTurnRateToleranceDegPerS = 0;
+
+         public static final double ksVolts = 0.22;
+         public static final double kvVoltSecondsPerMeter = 1.98;
+         public static final double kaVoltSecondsSquaredPerMeter = 0.2;
+         public static final double kPDriveVel = .05;
+
+           // Physical measurements of DT
+        public static final double kWheelRadius = 2.5; // inches
+        public static final double kTrackWidth = 0.00; // meters
+
+         public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackWidth);
 }
 
     public static final class ShooterConstants {
@@ -86,4 +106,26 @@ public static final class DriveConstants {
         // Solenoid ports
         public static final int hopperSolenoid = 3;
     }
+    public static final class AutoConstants {
+        public static final double kMaxSpeedMetersPerSecond = 3;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+
+        public static final double kRamseteB = 2;
+        public static final double kRamseteZeta = 0.7;
+    }
+/*
+    public static final class PathWeaver {
+    public static Trajectory getTrajectory(String path) {
+        try {
+            String realPath = "paths/" + path + ".wpilib";
+            //"/home/lvuser/deploy/output/paths/" + path + ".wpilib.json"
+            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(realPath);
+            return TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+        } catch (IOException ex) {
+            DriverStation.reportError("Unable to open trajectory: " + path, ex.getStackTrace());
+            return null;
+        }
+    }
+    */
 }
+

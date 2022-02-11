@@ -6,10 +6,15 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 //import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
@@ -25,20 +30,22 @@ public class Drivetrain extends SubsystemBase {
   private final MotorControllerGroup m_right;
   private final MotorControllerGroup m_left;
 
-  PIDController left_pid;
-  PIDController right_pid;
+  DifferentialDriveOdometry m_odometry;
+  private final AHRS m_gyro;
+  //PIDController left_pid;
+  //PIDController right_pid;
 
-  SimpleMotorFeedforward feedforward;
+  //SimpleMotorFeedforward feedforward;
   public Drivetrain() {
     m_leftMaster = new WPI_TalonFX(DriveConstants.dtFrontLeftPort);
     m_rightMaster = new WPI_TalonFX(DriveConstants.dtFrontRightPort);
     m_leftSlave = new WPI_TalonFX(DriveConstants.dtBackLeftPort);
     m_rightSlave = new WPI_TalonFX(DriveConstants.dtBackRightPort);
 
-     left_pid = new PIDController(0, 0, 0);
-     right_pid = new PIDController(0, 0, 0);
+     //left_pid = new PIDController(0, 0, 0);
+     //right_pid = new PIDController(0, 0, 0);
 
-     feedforward = new SimpleMotorFeedforward(1, 0, 0);
+     //feedforward = new SimpleMotorFeedforward(1, 0, 0);
 
         m_left = new MotorControllerGroup(m_leftMaster, m_leftSlave);
         m_right = new MotorControllerGroup(m_rightMaster, m_rightSlave);
@@ -65,7 +72,8 @@ public class Drivetrain extends SubsystemBase {
 
     // deadband: motors wont move if speed of motors is within deadband
     m_diffDrive.setDeadband(DriveConstants.kDeadband);
-
+    m_gyro = new AHRS(SPI.Port.kMXP);
+    m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
   
   }
  
@@ -73,9 +81,13 @@ public class Drivetrain extends SubsystemBase {
     m_diffDrive.arcadeDrive(forward * DriveConstants.kDriveSpeed, turn * DriveConstants.kTurnSpeed, true);
   }
 
+  public void tankDrive(final double left, final double right) {
+    m_diffDrive.tankDrive(left * DriveConstants.kDriveSpeed, right * DriveConstants.kDriveSpeed);
+  }
+
   // CURVATURE DRIVE = 2 STICK + QUICK TURN BUTTON
   public void curvatureDrive(final double forward, final double turn, final boolean quickTurn) {
-    m_diffDrive.curvatureDrive(forward * DriveConstants.kDriveSpeed, turn * DriveConstants.kTurnSpeed, quickTurn);
+    m_diffDrive.curvatureDrive(forward * DriveConstants.cDriveSpeed, turn * DriveConstants.cTurnSpeed, quickTurn);
   }
 
   public void baseDriveTo(double distance) {
@@ -91,11 +103,16 @@ public class Drivetrain extends SubsystemBase {
       }
     }
   }
-  
+  /*
   public void tankDriveWithPIDF(double rightVelocitySetpoint, double leftVelocitySetpoint) {
     m_left.setVoltage(feedforward.calculate(leftVelocitySetpoint) + left_pid.calculate(getLeftEncoderRate(), leftVelocitySetpoint));
     m_right.setVoltage(feedforward.calculate(rightVelocitySetpoint) + right_pid.calculate(getRightEncoderRate(), rightVelocitySetpoint));
   }
+*/
+public void tankDriveVolts(double leftVolts, double rightVolts) {
+  m_leftMaster.setVoltage(leftVolts);
+  m_rightMaster.setVoltage(rightVolts);
+}
 
 	public double getLeftEncoderPosition() {
     // get rotations of encoder by dividing encoder counts by counts per rotation
@@ -104,7 +121,7 @@ public class Drivetrain extends SubsystemBase {
     // get rotations of wheel by diving rotations of encoder by gear ratio
     double wheelRotations = encoderRotations / 8.4;
 
-    // get distance by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
+    // get distance by multiplying rotations of wh2.5 * 39.37eel by circumference of wheel (2 * pi * radius)
     double distance = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
 
 		return distance;
@@ -152,43 +169,27 @@ public class Drivetrain extends SubsystemBase {
 
 		return velocity;
 	}
+  public double getAverageEncoderRate() {
+    return (double) ((getLeftEncoderRate() + getRightEncoderRate()) / 2.0);
+  }
   public double getAverageEncoderDistance() {
-    return (getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0;
+    return (double) ((getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0);
   }
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    m_odometry.update(
+      m_gyro.getRotation2d(), getLeftEncoderPosition(), getRightEncoderPosition());
   }
-  /*
-  public boolean turnToTarget(Drivetrain drivetrain) {
-    updateLimelightTracking();
-    
-    double isNegative;
-    if (tx < 0) {
-      isNegative = -1;
-    } else {
-      isNegative = 1;
-    }
-
-    double txRatio = Math.abs(tx / 90);
-    txRatio += 0.1;
-    txRatio *= isNegative;
-
-    double m_rotationError = txRatio;
-    m_steerAdjust = m_rotationError;
-
-    if (m_limelightHasValidTarget) { // if limelight sees target
-      if (Math.abs(tx) <= VisionConstants.kTargetZone) { // if target is within zone
-        drivetrain.autoDrive(0.0, 0.0);
-        return true;
-      }
-      drivetrain.autoDrive(0, m_steerAdjust); // drive using command-tuned values
-      return false;
-    } else {
-      drivetrain.autoDrive(0.0, 0.0); // otherwise do nothing
-      return true;
-    }
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
   }
-
-  */
+  public void resetOdometry(Pose2d pose) {
+    m_leftMaster.setSelectedSensorPosition(0);
+    m_rightMaster.setSelectedSensorPosition(0);
+    m_odometry.resetPosition(pose, m_gyro.getRotation2d());
+  }
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(getLeftEncoderRate(), getRightEncoderRate()); // we are sending in meters/second
+  }
 }
