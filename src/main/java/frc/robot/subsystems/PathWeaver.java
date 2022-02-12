@@ -16,7 +16,8 @@ import edu.wpi.first.wpilibj.Filesystem;
 /** Add your docs here. */
 public class PathWeaver {
     public static Trajectory getTrajectory(String path) {
-        String realPath = "paths/" + path + ".wpilib";
+        String realPath = "paths/" + path + ".wpilib.json";
+        //DriveToTarget.wpilib.json
         Trajectory newTrajectory = new Trajectory();
         try {
             //"/home/lvuser/deploy/output/paths/" + path + ".wpilib.json"

@@ -175,6 +175,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
   */
   public Command getAutonomousCommand(String path) {
+    Trajectory exampleTrajectory = PathWeaver.getTrajectory(path); 
     // Create a voltage constraint to ensure we don't accelerate too fast
     var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
@@ -186,7 +187,7 @@ public class RobotContainer {
             5);
 
     // Create config for trajectory
-    /*
+    
     TrajectoryConfig config =
         new TrajectoryConfig(
                 AutoConstants.kMaxSpeedMetersPerSecond,
@@ -195,7 +196,7 @@ public class RobotContainer {
             .setKinematics(DriveConstants.kDriveKinematics)
             // Apply the voltage constraint
             .addConstraint(autoVoltageConstraint);
-*/
+
 
     // An example trajectory to follow.  All units in meters.
     
@@ -211,7 +212,7 @@ public class RobotContainer {
             // Pass config
             config);
 */
-  Trajectory exampleTrajectory = PathWeaver.getTrajectory(path); 
+  
 
     RamseteCommand ramseteCommand =
         new RamseteCommand(
