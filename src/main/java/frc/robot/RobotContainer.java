@@ -19,7 +19,6 @@ import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstrai
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
@@ -29,9 +28,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.PathWeaver;
 import frc.robot.commands.Auto;
-import frc.robot.commands.DriveToDistance;
 import frc.robot.commands.TurnToTarget;
-import frc.robot.commands.TurnToTargetProfiled;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
@@ -67,6 +64,7 @@ public class RobotContainer {
     // Put the chooser on the dashboard
     Shuffleboard.getTab("Autonomous").add(m_chooser);
 */
+
     m_drivetrain.setDefaultCommand(new RunCommand(() ->
     m_drivetrain.arcadeDrive(
       m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
@@ -74,6 +72,10 @@ public class RobotContainer {
   /*
     m_drivetrain.setDefaultCommand(new RunCommand(() -> 
     m_drivetrain.tankDrive(m_driverController.getLeftY(), m_driverController.getRightY()), m_drivetrain));
+*/
+/*
+m_drivetrain.setDefaultCommand(new RunCommand(() -> 
+m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverController.getRightY() * 12), m_drivetrain));
 */
 /*
     m_drivetrain.setDefaultCommand(new RunCommand(() -> 
@@ -208,7 +210,7 @@ public class RobotContainer {
             // Pass through these two interior waypoints, making an 's' curve path
             List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
             // End 3 meters straight ahead of where we started, facing forward
-            new Pose2d(3, 0, new Rotation2d(0)),
+            new Pose2d(2, 0, new Rotation2d(0)),
             // Pass config
             config);
 */

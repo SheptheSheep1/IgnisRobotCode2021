@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Limelight;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -19,6 +18,7 @@ public class TurnToTarget extends PIDCommand {
   public TurnToTarget(double targetAngleDegrees, Drivetrain drive) {
     super(
         // The controller that the command will use
+        //may want to use .005, 0, 0 because pid is overkill only need p
         new PIDController(.05, .03, .25),
         // Close loop on heading
         Limelight::getTx,

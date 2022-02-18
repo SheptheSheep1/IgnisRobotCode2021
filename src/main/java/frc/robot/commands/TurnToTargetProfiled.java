@@ -24,12 +24,12 @@ public class TurnToTargetProfiled extends ProfiledPIDCommand {
             0,
             0,
             // The motion profile constraints
-            new TrapezoidProfile.Constraints(0, 0)),
-        // This should return the measurement
+            new TrapezoidProfile.Constraints(.5, .5)),
+        //This should return the measurement
         Limelight::getTx,
         // This should return the goal (can also be a constant)
         () -> new TrapezoidProfile.State(targetAngleDegrees, 0),
-        // This uses the output
+        //This uses the output
         (output, setpoint) -> m_drive.arcadeDrive(0, output), 
         m_drive);
           // Use the output (and setpoint, if desired) here

@@ -48,14 +48,14 @@ public static final class DriveConstants {
          public static final double kTurnToleranceDeg = 0;
          public static final double kTurnRateToleranceDegPerS = 0;
 
-         public static final double ksVolts = 0.22;
-         public static final double kvVoltSecondsPerMeter = 1.98;
-         public static final double kaVoltSecondsSquaredPerMeter = 0.2;
-         public static final double kPDriveVel = .05;
+         public static final double ksVolts = 0.663;
+         public static final double kvVoltSecondsPerMeter = 1.802;
+         public static final double kaVoltSecondsSquaredPerMeter = 0.28;
+         public static final double kPDriveVel = 0.2;
 
            // Physical measurements of DT
-        public static final double kWheelRadius = 2.5; // inches
-        public static final double kTrackWidth = 0.00; // meters
+        public static final double kWheelRadius = .1524; // meters
+        public static final double kTrackWidth = .6096; // meters
 
          public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackWidth);
 }
@@ -107,8 +107,8 @@ public static final class DriveConstants {
         public static final int hopperSolenoid = 3;
     }
     public static final class AutoConstants {
-        public static final double kMaxSpeedMetersPerSecond = 3;
-        public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+        public static final double kMaxSpeedMetersPerSecond = 1.5;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 1.5;
 
         public static final double kRamseteB = 2;
         public static final double kRamseteZeta = 0.7;

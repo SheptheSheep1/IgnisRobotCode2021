@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
@@ -41,30 +39,35 @@ public class Drivetrain extends SubsystemBase {
     m_rightMaster = new WPI_TalonFX(DriveConstants.dtFrontRightPort);
     m_leftSlave = new WPI_TalonFX(DriveConstants.dtBackLeftPort);
     m_rightSlave = new WPI_TalonFX(DriveConstants.dtBackRightPort);
-
-     //left_pid = new PIDController(0, 0, 0);
-     //right_pid = new PIDController(0, 0, 0);
-
-     //feedforward = new SimpleMotorFeedforward(1, 0, 0);
-
+    
         m_left = new MotorControllerGroup(m_leftMaster, m_leftSlave);
         m_right = new MotorControllerGroup(m_rightMaster, m_rightSlave);
 
     m_diffDrive = new DifferentialDrive(m_left, m_right);
 
+    
     m_leftSlave.follow(m_leftMaster);
     m_rightSlave.follow(m_rightMaster);
 
-    m_left.setInverted(true); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    m_right.setInverted(false);// CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    
+    m_leftMaster.setInverted(true); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    m_leftSlave.setInverted(true);
+    m_right.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    m_left.setInverted(false);
+
+    m_leftMaster.setSelectedSensorPosition(0);
+    m_rightMaster.setSelectedSensorPosition(0);
+    m_leftSlave.setSelectedSensorPosition(0);
+    m_rightSlave.setSelectedSensorPosition(0);
+
     // flip so that motor output and sensor velocity are same polarity
-    m_leftMaster.setSensorPhase(false);
+    m_leftMaster.setSensorPhase(true);
     m_rightMaster.setSensorPhase(false);
     m_leftSlave.setSensorPhase(false);
     m_rightSlave.setSensorPhase(false);
     
-    // set mode of motors
+   
+    // set encoder
+    
     
 
     // diffdrive assumes by default that right side must be negative- change to false for master/slave config
@@ -103,6 +106,15 @@ public class Drivetrain extends SubsystemBase {
       }
     }
   }
+
+  public void rotateToAngle(double angle, double threshold) {
+    m_gyro.reset();
+    double error = (Limelight.getTx() + m_gyro.getAngle()) - m_gyro.getAngle();
+
+    if (error > threshold) {
+      m_diffDrive.arcadeDrive(0, error*.05);
+    }
+  }
   /*
   public void tankDriveWithPIDF(double rightVelocitySetpoint, double leftVelocitySetpoint) {
     m_left.setVoltage(feedforward.calculate(leftVelocitySetpoint) + left_pid.calculate(getLeftEncoderRate(), leftVelocitySetpoint));
@@ -110,7 +122,7 @@ public class Drivetrain extends SubsystemBase {
   }
 */
 public void tankDriveVolts(double leftVolts, double rightVolts) {
-  m_leftMaster.setVoltage(leftVolts);
+  m_leftMaster.setVoltage(-leftVolts);
   m_rightMaster.setVoltage(rightVolts);
 }
 
@@ -147,7 +159,7 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     double wheelRotations = encoderRotations / 8.4;
 
     // get velocity by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
-    double velocity = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+    double velocity = wheelRotations * ((Math.PI * (.1524)));
 
     // get distance per second by multiplying by 10; getSelectedSensorVelocity sends distance back per 100ms
     velocity *= 10;
@@ -162,7 +174,7 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     double wheelRotations = encoderRotations / 8.4;
 
     // get velocity by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
-    double velocity = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+    double velocity = wheelRotations * (Math.PI * (.1524));
 
     // get distance per second by multiplying by 10; getSelectedSensorVelocity sends distance back per 100ms
     velocity *= 10;
@@ -175,6 +187,8 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
   public double getAverageEncoderDistance() {
     return (double) ((getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0);
   }
+
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

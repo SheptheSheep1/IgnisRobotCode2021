@@ -53,16 +53,20 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    SmartDashboard.putNumber("Joystick X value", RobotContainer.m_driverController.getRightX());
+    //SmartDashboard.putNumber("Joystick X value", RobotContainer.m_driverController.getRightX());
     SmartDashboard.putNumber("Joystick Y value", RobotContainer.m_driverController.getLeftY());
-    SmartDashboard.putNumber("Joystick rTrigger", RobotContainer.m_driverController.getRightTriggerAxis());
-    SmartDashboard.putNumber("Joystick lTrigger", RobotContainer.m_driverController.getLeftTriggerAxis());
+    //SmartDashboard.putNumber("Joystick rTrigger", RobotContainer.m_driverController.getRightTriggerAxis());
+    //SmartDashboard.putNumber("Joystick lTrigger", RobotContainer.m_driverController.getLeftTriggerAxis());
     //SmartDashboard.putData("DriveTrain", RobotContainer.m_drivetrain);
     //SmartDashboard.putNumber("Intake", RobotContainer.m_intake.m_intakeMotor.getBusVoltage());
     //SmartDashboard.putNumber("Shooter", RobotContainer.m_shooter.m_master.getBusVoltage());
     //SmartDashboard.putNumber("Hopper", RobotContainer.m_hopper.m_hopperMotor.getBusVoltage());
     SmartDashboard.putNumber("Limelight Calculated Distance" , Limelight.calcDistance());
     SmartDashboard.putBoolean("LimelightHasValidTarget", Limelight.isTarget());
+    SmartDashboard.putNumber("RightEncoderRate" , m_robotContainer.m_drivetrain.getRightEncoderRate());
+    SmartDashboard.putNumber("LeftEncoderRate" , m_robotContainer.m_drivetrain.getLeftEncoderRate());
+    SmartDashboard.putNumber("RightEncoderPos" , m_robotContainer.m_drivetrain.getRightEncoderPosition());
+    SmartDashboard.putNumber("LeftEncoderPos" , m_robotContainer.m_drivetrain.getLeftEncoderPosition());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
