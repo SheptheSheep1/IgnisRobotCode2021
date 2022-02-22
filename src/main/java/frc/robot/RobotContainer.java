@@ -17,18 +17,23 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.PathWeaver;
 import frc.robot.commands.Auto;
+import frc.robot.commands.SwitchDriveMode;
 import frc.robot.commands.TurnToTarget;
+import frc.robot.commands.TurnToTargetProfiled;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
@@ -54,6 +59,7 @@ public class RobotContainer {
   SendableChooser<Command> m_chooser = new SendableChooser<>();
   private final Command m_auto = new Auto(m_drivetrain, m_shooter);
   private final Command m_path = getAutonomousCommand("DriveToTarget");
+   Timer m_timer = new Timer();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -65,9 +71,10 @@ public class RobotContainer {
     Shuffleboard.getTab("Autonomous").add(m_chooser);
 */
 
+//LeftY() should be negative because up on the left stick is a negative value
     m_drivetrain.setDefaultCommand(new RunCommand(() ->
     m_drivetrain.arcadeDrive(
-      m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
+      -m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
   
   /*
     m_drivetrain.setDefaultCommand(new RunCommand(() -> 
@@ -130,12 +137,35 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
         new JoystickButton(m_driverController, Button.kA.value)
         .whenPressed(new DriveToDistance(100, m_drivetrain).withTimeout(3));
 */
+/*
         new JoystickButton(m_driverController, Button.kX.value)
-        .whenPressed(new TurnToTarget(0, m_drivetrain).withTimeout(3));
+        .whenPressed(() -> {
+         new RunCommand(() -> 
+           m_drivetrain.switchDriveMode("Brake"), m_drivetrain);
+          Timer.delay(1);
+          new TurnToTarget(0, m_drivetrain).withTimeout(3);
+          new RunCommand(() -> m_drivetrain.switchDriveMode("Coast"), m_drivetrain);
+         }, m_drivetrain);
+        */
+        /*
+        new JoystickButton(m_driverController, Button.kX.value)
+        .whenPressed(new SequentialCommandGroup(
+          new RunCommand(() -> m_drivetrain.switchDriveMode("Brake"), m_drivetrain),
+          new TurnToTarget(0, m_drivetrain),
+          new RunCommand(() -> m_drivetrain.switchDriveMode("Coast"), m_drivetrain)));
+          */
+          
+          new JoystickButton(m_driverController, Button.kX.value)
+        .whenPressed(new SequentialCommandGroup(
+          new SwitchDriveMode("Brake", m_drivetrain),
+          new TurnToTarget(0, m_drivetrain),
+          new SwitchDriveMode("Coast", m_drivetrain)));
+
       /*
         new JoystickButton(m_driverController, Button.kX.value)
         .whenPressed(new TurnToTargetProfiled(0, m_drivetrain));
         */
+
         new JoystickButton(m_driverController, Button.kLeftBumper.value)
         .whenPressed(new RunCommand(() -> m_intake.setIntake(-.2), m_intake))
         .whenReleased(new RunCommand(() -> m_intake.setIntake(0), m_intake));
@@ -176,8 +206,9 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
    *
    * @return the command to run in autonomous
   */
-  public Command getAutonomousCommand(String path) {
+  public static Command getAutonomousCommand(String path) {
     Trajectory exampleTrajectory = PathWeaver.getTrajectory(path); 
+    
     // Create a voltage constraint to ensure we don't accelerate too fast
     var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
@@ -214,7 +245,7 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
             // Pass config
             config);
 */
-  
+
 
     RamseteCommand ramseteCommand =
         new RamseteCommand(
@@ -235,7 +266,7 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
 
     // Reset odometry to the starting pose of the trajectory.
     m_drivetrain.resetOdometry(exampleTrajectory.getInitialPose());
-
+  
     // Run path following command, then stop at the end.
     return ramseteCommand.andThen(() -> m_drivetrain.tankDriveVolts(0, 0));
 
@@ -249,9 +280,4 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
   public static RobotContainer getInstance() {
     return m_robotContainer;
   }
-  /*
-  public Command getAutonomousCommand() {
-    return m_chooser.getSelected();
-  }
-  */
 }

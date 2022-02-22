@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -12,16 +13,22 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.SPI;
 
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.SPI;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-//import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 public class Drivetrain extends SubsystemBase {
   /** Creates a new Drivetrain. */
-  private final WPI_TalonFX m_leftMaster, m_rightMaster, m_leftSlave, m_rightSlave;
-  //private final SupplyCurrentLimitConfiguration m_currentLimitConfig;
+  public final WPI_TalonFX m_leftMaster;
+
+  public final WPI_TalonFX m_rightMaster;
+
+  public final WPI_TalonFX m_leftSlave;
+
+  public final WPI_TalonFX m_rightSlave;
 
   private final DifferentialDrive m_diffDrive;
 
@@ -29,17 +36,15 @@ public class Drivetrain extends SubsystemBase {
   private final MotorControllerGroup m_left;
 
   DifferentialDriveOdometry m_odometry;
+  
   private final AHRS m_gyro;
-  //PIDController left_pid;
-  //PIDController right_pid;
-
-  //SimpleMotorFeedforward feedforward;
+  
   public Drivetrain() {
     m_leftMaster = new WPI_TalonFX(DriveConstants.dtFrontLeftPort);
     m_rightMaster = new WPI_TalonFX(DriveConstants.dtFrontRightPort);
     m_leftSlave = new WPI_TalonFX(DriveConstants.dtBackLeftPort);
     m_rightSlave = new WPI_TalonFX(DriveConstants.dtBackRightPort);
-    
+  
         m_left = new MotorControllerGroup(m_leftMaster, m_leftSlave);
         m_right = new MotorControllerGroup(m_rightMaster, m_rightSlave);
 
@@ -49,26 +54,30 @@ public class Drivetrain extends SubsystemBase {
     m_leftSlave.follow(m_leftMaster);
     m_rightSlave.follow(m_rightMaster);
 
+    //Invert left side changed due to Differential drive no longer automatically inverting controllers
     m_leftMaster.setInverted(true); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
     m_leftSlave.setInverted(true);
+    //May have to invert the motor controllers when using voltage based output
     m_right.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
     m_left.setInverted(false);
 
+    //Set mode to coast rather than brake to perserve motors
+    m_rightMaster.setNeutralMode(NeutralMode.Coast);
+    m_rightSlave.setNeutralMode(NeutralMode.Coast);
+    m_leftMaster.setNeutralMode(NeutralMode.Coast);
+    m_rightSlave.setNeutralMode(NeutralMode.Coast);
+
+    //Configure encoder
+    m_leftMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    m_leftSlave.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    m_rightMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    m_rightSlave.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    //configure encoder
     m_leftMaster.setSelectedSensorPosition(0);
     m_rightMaster.setSelectedSensorPosition(0);
     m_leftSlave.setSelectedSensorPosition(0);
     m_rightSlave.setSelectedSensorPosition(0);
-
-    // flip so that motor output and sensor velocity are same polarity
-    m_leftMaster.setSensorPhase(true);
-    m_rightMaster.setSensorPhase(false);
-    m_leftSlave.setSensorPhase(false);
-    m_rightSlave.setSensorPhase(false);
-    
-   
-    // set encoder
-    
-    
+    // deleted sensor polarity because it does not work
 
     // diffdrive assumes by default that right side must be negative- change to false for master/slave config
    // m_diffDrive.setRightSideInverted(false); // DO NOT CHANGE THIS
@@ -79,7 +88,22 @@ public class Drivetrain extends SubsystemBase {
     m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
   
   }
- 
+ /*
+  public void switchDriveMode(String mode) {
+    if (mode.equals("Brake")) {
+      m_rightMaster.setNeutralMode(NeutralMode.Brake);
+      m_rightSlave.setNeutralMode(NeutralMode.Brake);
+      m_leftMaster.setNeutralMode(NeutralMode.Brake);
+      m_leftSlave.setNeutralMode(NeutralMode.Brake);
+    } else {
+      m_rightMaster.setNeutralMode(NeutralMode.Coast);
+      m_rightSlave.setNeutralMode(NeutralMode.Coast);
+      m_leftMaster.setNeutralMode(NeutralMode.Coast);
+      m_leftSlave.setNeutralMode(NeutralMode.Coast);
+    }
+    System.out.println("Mode: " + mode);
+  }
+  */
   public void arcadeDrive(final double forward, final double turn) {
     m_diffDrive.arcadeDrive(forward * DriveConstants.kDriveSpeed, turn * DriveConstants.kTurnSpeed, true);
   }
@@ -121,11 +145,23 @@ public class Drivetrain extends SubsystemBase {
     m_right.setVoltage(feedforward.calculate(rightVelocitySetpoint) + right_pid.calculate(getRightEncoderRate(), rightVelocitySetpoint));
   }
 */
+
 public void tankDriveVolts(double leftVolts, double rightVolts) {
-  m_leftMaster.setVoltage(-leftVolts);
-  m_rightMaster.setVoltage(rightVolts);
+  m_left.setVoltage(leftVolts);
+  m_right.setVoltage(rightVolts);
+  m_diffDrive.feed();
 }
 
+public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
+  var batteryVoltage = RobotController.getBatteryVoltage();
+  if (Math.max(Math.abs(leftVolts), Math.abs(rightVolts)) > batteryVoltage) {
+    leftVolts *= batteryVoltage / 12.0;
+    rightVolts *= batteryVoltage / 12.0;
+  }
+  m_left.setVoltage(leftVolts);
+  m_right.setVoltage(rightVolts);
+  m_diffDrive.feed();
+}
 	public double getLeftEncoderPosition() {
     // get rotations of encoder by dividing encoder counts by counts per rotation
     double encoderRotations = m_leftMaster.getSelectedSensorPosition() / 2048;
@@ -133,8 +169,8 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     // get rotations of wheel by diving rotations of encoder by gear ratio
     double wheelRotations = encoderRotations / 8.4;
 
-    // get distance by multiplying rotations of wh2.5 * 39.37eel by circumference of wheel (2 * pi * radius)
-    double distance = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+    // get distance by multiplying rotations of wheel by circumference of wheel (pi * diameter in meters)
+    double distance = wheelRotations * (Math.PI * (.1524));
 
 		return distance;
 	}
@@ -146,8 +182,8 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     // get rotations of wheel by diving rotations of encoder by gear ratio
     double wheelRotations = encoderRotations / 8.4;
 
-    // get distance by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
-    double distance = wheelRotations * (2 * Math.PI * (2.5 * 39.37));
+    // get distance by multiplying rotations of wheel by circumference of wheel (pi * diameter in meters)
+    double distance = wheelRotations * (Math.PI * (.1524));
 
 		return distance;
   }
@@ -158,7 +194,7 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     // get rotations of wheel by diving rotations of encoder by gear ratio
     double wheelRotations = encoderRotations / 8.4;
 
-    // get velocity by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
+    // get velocity by multiplying rotations of wheel by circumference of wheel (pi * diameter in meters)
     double velocity = wheelRotations * ((Math.PI * (.1524)));
 
     // get distance per second by multiplying by 10; getSelectedSensorVelocity sends distance back per 100ms
@@ -173,7 +209,7 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     // get rotations of wheel by diving rotations of encoder by gear ratio
     double wheelRotations = encoderRotations / 8.4;
 
-    // get velocity by multiplying rotations of wheel by circumference of wheel (2 * pi * radius)
+    // get velocity by multiplying rotations of wheel by circumference of wheel (pi * diameter in meters)
     double velocity = wheelRotations * (Math.PI * (.1524));
 
     // get distance per second by multiplying by 10; getSelectedSensorVelocity sends distance back per 100ms
@@ -188,13 +224,6 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     return (double) ((getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0);
   }
 
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    m_odometry.update(
-      m_gyro.getRotation2d(), getLeftEncoderPosition(), getRightEncoderPosition());
-  }
   public Pose2d getPose() {
     return m_odometry.getPoseMeters();
   }
@@ -203,7 +232,29 @@ public void tankDriveVolts(double leftVolts, double rightVolts) {
     m_rightMaster.setSelectedSensorPosition(0);
     m_odometry.resetPosition(pose, m_gyro.getRotation2d());
   }
+  //
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
     return new DifferentialDriveWheelSpeeds(getLeftEncoderRate(), getRightEncoderRate()); // we are sending in meters/second
   }
+  //degrees -180 to 180; left should be going positive
+  public double getHeading() {
+    return Math.IEEEremainder(m_gyro.getAngle(), 360) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    //return m_gyro.getRotation2d().getDegrees();
+  }
+  public void zeroHeading() {
+    m_gyro.reset();
+  }
+  public double getTurnRate() {
+    return m_gyro.getRate();
+  }
+  public void setMaxOutput(double maxOutput) {
+    m_diffDrive.setMaxOutput(maxOutput);
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    m_odometry.update(
+      Rotation2d.fromDegrees(getHeading()), getLeftEncoderPosition(), getRightEncoderPosition());
+}
 }

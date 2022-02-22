@@ -17,13 +17,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
   public final CANSparkMax m_master;
-private final CANSparkMax m_slave;
-  private final Limelight m_limelight;
+  private final CANSparkMax m_slave;
+  //private final Limelight m_limelight;
 
   public Shooter() {
     m_master = new CANSparkMax(ShooterConstants.shooterFirstPort, MotorType.kBrushless);
     m_slave = new CANSparkMax(ShooterConstants.shooterSecondPort, MotorType.kBrushless);
-    m_limelight = new Limelight();
+  //  m_limelight = new Limelight();
     m_slave.follow(m_master, true);
 
     m_master.getEncoder().setPosition(0);

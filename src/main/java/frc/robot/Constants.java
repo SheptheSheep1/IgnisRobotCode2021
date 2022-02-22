@@ -57,6 +57,8 @@ public static final class DriveConstants {
         public static final double kWheelRadius = .1524; // meters
         public static final double kTrackWidth = .6096; // meters
 
+        public static boolean kGyroReversed = true;
+
          public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackWidth);
 }
 

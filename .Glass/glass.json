@@ -1,23 +1,42 @@
 {
-  "NTProvider": {
+  "NetworkTables": {
+    "CameraPublisher": {
+      "limelight": {
+        "open": true
+      }
+    },
+    "SmartDashboard": {
+      "Field2D": {
+        "open": true
+      },
+      "open": true
+    },
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/LiveWindow/Drivetrain": "Subsystem",
-      "/LiveWindow/Hopper": "Subsystem",
-      "/LiveWindow/Intake": "Subsystem",
-      "/LiveWindow/Shooter": "Subsystem",
       "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro",
-      "/Shuffleboard/Autonomous/SendableChooser[0]": "String Chooser",
-      "/SmartDashboard/DriveTrain": "Subsystem",
       "/SmartDashboard/Field2D": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Field2D": {
+        "Trajectory": {
+          "style": "Line"
+        },
+        "image": "C:\\Users\\ryans\\Downloads\\2022-field.png",
+        "window": {
+          "visible": true
+        }
+      }
     }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client",
+    "serverTeam": "3019"
   }
 }

@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.subsystems.Drivetrain;
@@ -19,7 +21,8 @@ public class TurnToTarget extends PIDCommand {
     super(
         // The controller that the command will use
         //may want to use .005, 0, 0 because pid is overkill only need p
-        new PIDController(.05, .03, .25),
+        //.05, .03, .25
+        new PIDController(.05, 0, 0),
         // Close loop on heading
         Limelight::getTx,
         // Set reference to target
@@ -30,13 +33,10 @@ public class TurnToTarget extends PIDCommand {
         drive);
 
     getController().enableContinuousInput(-180, 180);
-    
     //getController().setTolerance(1);
     // Set the controller tolerance - the delta tolerance ensures the robot is stationary at the
     // setpoint before it is considered as having reached the reference
-   getController().setTolerance(1, 0);
-   //System.out.println(getController().calculate(Limelight.getTx(), targetAngleDegrees));
-   //System.out.println(getController().toString());
+   getController().setTolerance(0, 0);
   }
 
   // Returns true when the command should end.
