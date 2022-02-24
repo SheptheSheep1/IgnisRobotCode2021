@@ -4,36 +4,27 @@
 
 package frc.robot;
 
-import java.util.List;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.PathWeaver;
 import frc.robot.commands.Auto;
 import frc.robot.commands.SwitchDriveMode;
+import frc.robot.commands.TurnDegrees;
 import frc.robot.commands.TurnToTarget;
-import frc.robot.commands.TurnToTargetProfiled;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
@@ -50,16 +41,16 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   public static final Drivetrain m_drivetrain = new Drivetrain();
-  public static final Shooter m_shooter = new Shooter();
+  private static final Shooter m_shooter = new Shooter();
   public static final XboxController m_driverController = new XboxController(0);
-  public static final Intake m_intake = new Intake();
-  public static final Hopper m_hopper = new Hopper();
+  private static final Intake m_intake = new Intake();
+  private static final Hopper m_hopper = new Hopper();
   private static RobotContainer m_robotContainer = new RobotContainer();
-  public static final Limelight m_limelight = new Limelight();
+  private static final Limelight m_limelight = new Limelight();
   SendableChooser<Command> m_chooser = new SendableChooser<>();
   private final Command m_auto = new Auto(m_drivetrain, m_shooter);
   private final Command m_path = getAutonomousCommand("DriveToTarget");
-   Timer m_timer = new Timer();
+   //Timer m_timer = new Timer();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -74,7 +65,7 @@ public class RobotContainer {
 //LeftY() should be negative because up on the left stick is a negative value
     m_drivetrain.setDefaultCommand(new RunCommand(() ->
     m_drivetrain.arcadeDrive(
-      -m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
+      -m_driverController.getLeftY(), -m_driverController.getRightX()), m_drivetrain));
   
   /*
     m_drivetrain.setDefaultCommand(new RunCommand(() -> 
@@ -93,11 +84,6 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
                   m_shooter.manualSpinMotor(
                     m_driverController.getRightTrigger()), m_shooter));
                   */ 
-                  /*
-      m_intake.setDefaultCommand(new RunCommand(() -> 
-                  m_intake.setIntake(
-                    m_driverController.getLeftY()), m_intake));
-              */ 
              /*
     m_hopper.setDefaultCommand(new RunCommand(() ->
                         m_hopper.setHopper(m_driverController.getLeftY()), m_hopper));
@@ -115,38 +101,10 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
    */
   
   private void configureButtonBindings() {
-    /*
-    new JoystickButton(m_driverController, Button.kA.value)
-        .whenHeld(
-            new PIDCommand(new PIDController(.175, 0, .1),
-            // Close loop on heading
-            Limelight::getTx,
-            // Set reference to target
-            0,
-            // Pipe output to turn robot
-            output -> m_drivetrain.arcadeDrive(0.0, output), m_drivetrain));
-            */
-            /*
-        new JoystickButton(m_driverController, Button.kY.value)
-        .whenPressed(new RunCommand(() -> m_shooter.manualSpinMotor(0), m_shooter));
-        */
 /*
-        new JoystickButton(m_driverController, Button.kB.value)
-        .whenPressed(new PIDShooter(m_shooter).withTimeout(3));
-*//*
         new JoystickButton(m_driverController, Button.kA.value)
         .whenPressed(new DriveToDistance(100, m_drivetrain).withTimeout(3));
 */
-/*
-        new JoystickButton(m_driverController, Button.kX.value)
-        .whenPressed(() -> {
-         new RunCommand(() -> 
-           m_drivetrain.switchDriveMode("Brake"), m_drivetrain);
-          Timer.delay(1);
-          new TurnToTarget(0, m_drivetrain).withTimeout(3);
-          new RunCommand(() -> m_drivetrain.switchDriveMode("Coast"), m_drivetrain);
-         }, m_drivetrain);
-        */
         /*
         new JoystickButton(m_driverController, Button.kX.value)
         .whenPressed(new SequentialCommandGroup(
@@ -156,15 +114,14 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
           */
           
           new JoystickButton(m_driverController, Button.kX.value)
-        .whenPressed(new SequentialCommandGroup(
-          new SwitchDriveMode("Brake", m_drivetrain),
-          new TurnToTarget(0, m_drivetrain),
-          new SwitchDriveMode("Coast", m_drivetrain)));
+        .whenPressed( new TurnToTarget(0, m_drivetrain).withTimeout(1));
 
       /*
         new JoystickButton(m_driverController, Button.kX.value)
         .whenPressed(new TurnToTargetProfiled(0, m_drivetrain));
         */
+        new JoystickButton(m_driverController, Button.kRightBumper.value)
+        .whenPressed(new SwitchDriveMode(m_drivetrain));
 
         new JoystickButton(m_driverController, Button.kLeftBumper.value)
         .whenPressed(new RunCommand(() -> m_intake.setIntake(-.2), m_intake))
@@ -173,6 +130,8 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
         new JoystickButton(m_driverController, Button.kY.value)
         .whenPressed(new RunCommand(() -> m_drivetrain.baseDriveTo(100)));
 
+        new JoystickButton(m_driverController, Button.kA.value)
+        .whenPressed(new TurnDegrees(90 + m_drivetrain.m_gyro.getAngle(), m_drivetrain).withTimeout(1.5));
     //Intake System
     /*
     new JoystickButton(m_driverController, Button.kB.value)

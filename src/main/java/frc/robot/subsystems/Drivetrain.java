@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import com.kauailabs.navx.frc.AHRS;
@@ -37,8 +38,9 @@ public class Drivetrain extends SubsystemBase {
 
   DifferentialDriveOdometry m_odometry;
   
-  private final AHRS m_gyro;
+  public final AHRS m_gyro;
   
+  private boolean bool;
   public Drivetrain() {
     m_leftMaster = new WPI_TalonFX(DriveConstants.dtFrontLeftPort);
     m_rightMaster = new WPI_TalonFX(DriveConstants.dtFrontRightPort);
@@ -50,23 +52,25 @@ public class Drivetrain extends SubsystemBase {
 
     m_diffDrive = new DifferentialDrive(m_left, m_right);
 
-    
+
     m_leftSlave.follow(m_leftMaster);
     m_rightSlave.follow(m_rightMaster);
 
     //Invert left side changed due to Differential drive no longer automatically inverting controllers
-    m_leftMaster.setInverted(true); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    m_leftSlave.setInverted(true);
+    m_leftMaster.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    m_leftSlave.setInverted(false);
+    m_rightMaster.setInverted(true);
+    m_rightSlave.setInverted(true);
     //May have to invert the motor controllers when using voltage based output
-    m_right.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    m_left.setInverted(false);
+    //m_right.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+    //m_left.setInverted(false);
 
     //Set mode to coast rather than brake to perserve motors
-    m_rightMaster.setNeutralMode(NeutralMode.Coast);
-    m_rightSlave.setNeutralMode(NeutralMode.Coast);
-    m_leftMaster.setNeutralMode(NeutralMode.Coast);
-    m_rightSlave.setNeutralMode(NeutralMode.Coast);
-
+    m_rightMaster.setNeutralMode(NeutralMode.Brake);
+    m_rightSlave.setNeutralMode(NeutralMode.Brake);
+    m_leftMaster.setNeutralMode(NeutralMode.Brake);
+    m_rightSlave.setNeutralMode(NeutralMode.Brake);
+    
     //Configure encoder
     m_leftMaster.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
     m_leftSlave.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
@@ -86,25 +90,31 @@ public class Drivetrain extends SubsystemBase {
     m_diffDrive.setDeadband(DriveConstants.kDeadband);
     m_gyro = new AHRS(SPI.Port.kMXP);
     m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
-  
+   
+    bool = true;
   }
- /*
-  public void switchDriveMode(String mode) {
-    if (mode.equals("Brake")) {
+ 
+  public void switchDriveMode() {
+    bool = !bool;
+    //mode.equals("Brake")
+    if (bool == true) {
       m_rightMaster.setNeutralMode(NeutralMode.Brake);
       m_rightSlave.setNeutralMode(NeutralMode.Brake);
       m_leftMaster.setNeutralMode(NeutralMode.Brake);
       m_leftSlave.setNeutralMode(NeutralMode.Brake);
+      System.out.println("Mode: Brake");
     } else {
       m_rightMaster.setNeutralMode(NeutralMode.Coast);
       m_rightSlave.setNeutralMode(NeutralMode.Coast);
       m_leftMaster.setNeutralMode(NeutralMode.Coast);
       m_leftSlave.setNeutralMode(NeutralMode.Coast);
+      System.out.println("Mode: Coast");
     }
-    System.out.println("Mode: " + mode);
   }
-  */
+  
   public void arcadeDrive(final double forward, final double turn) {
+    SmartDashboard.putNumber("forward", forward * DriveConstants.kDriveSpeed);
+    SmartDashboard.putNumber("turn", turn * DriveConstants.kTurnSpeed);
     m_diffDrive.arcadeDrive(forward * DriveConstants.kDriveSpeed, turn * DriveConstants.kTurnSpeed, true);
   }
 
@@ -238,8 +248,15 @@ public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
   }
   //degrees -180 to 180; left should be going positive
   public double getHeading() {
-    return Math.IEEEremainder(m_gyro.getAngle(), 360) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    return Math.IEEEremainder(-m_gyro.getAngle(), 360) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
     //return m_gyro.getRotation2d().getDegrees();
+  }
+  public double countAngle() {
+    zeroHeading();
+    return -m_gyro.getAngle();
+  }
+  public double getAngle() {
+    return -m_gyro.getAngle();
   }
   public void zeroHeading() {
     m_gyro.reset();

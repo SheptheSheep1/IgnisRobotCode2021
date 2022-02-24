@@ -12,7 +12,9 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.PathWeaver;
+import frc.robot.commands.SwitchDriveMode;
 //import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.Limelight;
 
@@ -42,6 +44,7 @@ public class Robot extends TimedRobot {
     //accidently deleted some objects such as drivetraina and shooter but robotcontainer should have it for me
     m_robotContainer = RobotContainer.getInstance();
         HAL.report(tResourceType.kResourceType_Framework, tInstances.kFramework_RobotBuilder);
+        m_robotContainer.m_drivetrain.switchDriveMode();
   }
 
   /**
@@ -67,7 +70,12 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("RightEncoderPos" , m_robotContainer.m_drivetrain.getRightEncoderPosition());
     SmartDashboard.putNumber("LeftEncoderPos" , m_robotContainer.m_drivetrain.getLeftEncoderPosition());
     SmartDashboard.putData("Field2D", m_field);
+    SmartDashboard.putNumber("Angle", m_robotContainer.m_drivetrain.getAngle());
     SmartDashboard.putNumber("Heading", m_robotContainer.m_drivetrain.getHeading());
+    SmartDashboard.putNumber("LM Supply Current", m_robotContainer.m_drivetrain.m_leftMaster.getSupplyCurrent());
+    SmartDashboard.putNumber("LS Supply Current", m_robotContainer.m_drivetrain.m_leftSlave.getSupplyCurrent());
+    SmartDashboard.putNumber("RM Supply Current", m_robotContainer.m_drivetrain.m_rightMaster.getSupplyCurrent());
+    SmartDashboard.putNumber("RS Supply Current", m_robotContainer.m_drivetrain.m_leftSlave.getSupplyCurrent());
     //SmartDashboard.put("Wheel Speeds", m_robotContainer.m_drivetrain.getWheelSpeeds());
   }
 

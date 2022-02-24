@@ -4,8 +4,7 @@
 
 package frc.robot.commands;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.subsystems.Drivetrain;
@@ -22,16 +21,17 @@ public class TurnToTarget extends PIDCommand {
         // The controller that the command will use
         //may want to use .005, 0, 0 because pid is overkill only need p
         //.05, .03, .25
-        new PIDController(.05, 0, 0),
+        new PIDController(.1, 0, 0),
         // Close loop on heading
         Limelight::getTx,
         // Set reference to target
         targetAngleDegrees,
         // Pipe output to turn robot
-        output -> drive.arcadeDrive(0.0, -output),
+        output -> drive.arcadeDrive(0.0, MathUtil.clamp(output, -1, 1)),
         // Require the drive
         drive);
 
+      addRequirements(drive);
     getController().enableContinuousInput(-180, 180);
     //getController().setTolerance(1);
     // Set the controller tolerance - the delta tolerance ensures the robot is stationary at the

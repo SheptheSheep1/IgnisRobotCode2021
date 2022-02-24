@@ -34,6 +34,7 @@ public class TurnToTargetProfiled extends ProfiledPIDCommand {
         m_drive);
           // Use the output (and setpoint, if desired) here
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(m_drive);
     getController().enableContinuousInput(-180, 180);
     getController().setTolerance(1, 0);
     // Configure additional PID options by calling `getController` here.
