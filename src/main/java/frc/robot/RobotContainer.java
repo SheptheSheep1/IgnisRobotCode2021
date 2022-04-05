@@ -4,31 +4,43 @@
 
 package frc.robot;
 
+import java.util.List;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.PathWeaver;
 import frc.robot.commands.Auto;
+import frc.robot.commands.DriveDistance;
 import frc.robot.commands.SwitchDriveMode;
 import frc.robot.commands.TurnDegrees;
 import frc.robot.commands.TurnToTarget;
+import frc.robot.subsystems.ColorSensor;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Shooter;
 
 /**
@@ -39,41 +51,52 @@ import frc.robot.subsystems.Shooter;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-
+  private enum CommandSelector {
+    ONE, TWO, THREE
+  }
+  private CommandSelector select() {
+    return CommandSelector.ONE;
+  }
   public static final Drivetrain m_drivetrain = new Drivetrain();
   private static final Shooter m_shooter = new Shooter();
   public static final XboxController m_driverController = new XboxController(0);
   private static final Intake m_intake = new Intake();
   private static final Hopper m_hopper = new Hopper();
+  public static final ColorSensor m_colorSensor = new ColorSensor();
   private static RobotContainer m_robotContainer = new RobotContainer();
-  private static final Limelight m_limelight = new Limelight();
+ // private static final Limelight m_limelight = new Limelight();
   SendableChooser<Command> m_chooser = new SendableChooser<>();
   private final Command m_auto = new Auto(m_drivetrain, m_shooter);
-  private final Command m_path = getAutonomousCommand("DriveToTarget");
-   //Timer m_timer = new Timer();
+  public final Command m_path = getAutonomousCommand("DriveToTarget");
+   Timer m_timer = new Timer();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
+/*
+    Trajectory[] m_paths = new Trajectory[] {
+      PathWeaver.getTrajectory("DriveToTarget")
+    };
+    */
     configureButtonBindings();
-   /*
+    m_chooser.setDefaultOption("PathWeaver", m_path);
     m_chooser.addOption("Autonomous", m_auto);
-    m_chooser.addOption("PathWeaver", m_path);
     // Put the chooser on the dashboard
     Shuffleboard.getTab("Autonomous").add(m_chooser);
-*/
+
 
 //LeftY() should be negative because up on the left stick is a negative value
+
     m_drivetrain.setDefaultCommand(new RunCommand(() ->
     m_drivetrain.arcadeDrive(
-      -m_driverController.getLeftY(), -m_driverController.getRightX()), m_drivetrain));
+      -m_driverController.getLeftY(), m_driverController.getRightX()), m_drivetrain));
   
   /*
     m_drivetrain.setDefaultCommand(new RunCommand(() -> 
-    m_drivetrain.tankDrive(m_driverController.getLeftY(), m_driverController.getRightY()), m_drivetrain));
+    m_drivetrain.tankDrive(-m_driverController.getLeftY(), -m_driverController.getRightY()), m_drivetrain));
 */
 /*
 m_drivetrain.setDefaultCommand(new RunCommand(() -> 
-m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverController.getRightY() * 12), m_drivetrain));
+m_drivetrain.tankDriveVolts(-m_driverController.getLeftY() * 12, -m_driverController.getRightY() * 12), m_drivetrain));
 */
 /*
     m_drivetrain.setDefaultCommand(new RunCommand(() -> 
@@ -103,7 +126,7 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
   private void configureButtonBindings() {
 /*
         new JoystickButton(m_driverController, Button.kA.value)
-        .whenPressed(new DriveToDistance(100, m_drivetrain).withTimeout(3));
+        .whenPressed(new DriveDistance(100, m_drivetrain).withTimeout(3));
 */
         /*
         new JoystickButton(m_driverController, Button.kX.value)
@@ -114,7 +137,7 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
           */
           
           new JoystickButton(m_driverController, Button.kX.value)
-        .whenPressed( new TurnToTarget(0, m_drivetrain).withTimeout(1));
+        .whenPressed(new TurnToTarget(0, m_drivetrain).withTimeout(1));
 
       /*
         new JoystickButton(m_driverController, Button.kX.value)
@@ -126,18 +149,35 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
         new JoystickButton(m_driverController, Button.kLeftBumper.value)
         .whenPressed(new RunCommand(() -> m_intake.setIntake(-.2), m_intake))
         .whenReleased(new RunCommand(() -> m_intake.setIntake(0), m_intake));
-        
+        /*
         new JoystickButton(m_driverController, Button.kY.value)
         .whenPressed(new RunCommand(() -> m_drivetrain.baseDriveTo(100)));
-
+        */
+/*
         new JoystickButton(m_driverController, Button.kA.value)
-        .whenPressed(new TurnDegrees(90 + m_drivetrain.m_gyro.getAngle(), m_drivetrain).withTimeout(1.5));
+        .whenPressed(
+          new SequentialCommandGroup(
+            new InstantCommand(() -> m_drivetrain.zeroHeading(), m_drivetrain),
+          new TurnDegrees(-90, m_drivetrain).withTimeout(1.5)));
+          */
+/*
+      new JoystickButton(m_driverController, Button.kY.value)
+    .whenPressed(new Auto(m_drivetrain, m_shooter));
+*/
+
+    new JoystickButton(m_driverController, Button.kB.value)
+    .whenPressed(new RunCommand(() -> m_hopper.setHopper(.8), m_hopper))
+    .whenReleased(new RunCommand(() -> m_hopper.setHopper(0), m_hopper));
+
+    new JoystickButton(m_driverController, Button.kA.value)
+    .whenPressed(new RunCommand(() -> m_shooter.manualSpinMotor(1), m_shooter))
+    .whenReleased(new RunCommand(() -> m_shooter.manualSpinMotor(0), m_shooter));
     //Intake System
     /*
     new JoystickButton(m_driverController, Button.kB.value)
                         .whileHeld(() -> {
                                 m_intake.setIntake(IntakeConstants.kIntakeSpeed);
-                                m_hopper.setHopper(HopperConstants.kHopperSpeed);
+                                m_hopper._setHopper(HopperConstants.kHopperSpeed);
                         }, m_intake, m_hopper)
                         .whenReleased(() -> {
                                 m_intake.setIntake(0);
@@ -166,6 +206,7 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
    * @return the command to run in autonomous
   */
   public static Command getAutonomousCommand(String path) {
+    m_drivetrain.resetAllSensors();
     Trajectory exampleTrajectory = PathWeaver.getTrajectory(path); 
     
     // Create a voltage constraint to ensure we don't accelerate too fast
@@ -192,19 +233,19 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
 
     // An example trajectory to follow.  All units in meters.
     
-
-    /*
+/*
+    
        Trajectory exampleTrajectory =  TrajectoryGenerator.generateTrajectory(
             // Start at the origin facing the +X direction
             new Pose2d(0, 0, new Rotation2d(0)),
             // Pass through these two interior waypoints, making an 's' curve path
-            List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+            List.of(new Translation2d(2, 2), new Translation2d(3, -2)),
             // End 3 meters straight ahead of where we started, facing forward
-            new Pose2d(2, 0, new Rotation2d(0)),
+            new Pose2d(5, 0, new Rotation2d(0)),
             // Pass config
             config);
 */
-
+        m_drivetrain.m_field.getObject("traj").setTrajectory(exampleTrajectory);
 
     RamseteCommand ramseteCommand =
         new RamseteCommand(
@@ -238,5 +279,8 @@ m_drivetrain.tankDriveVolts(m_driverController.getLeftY() * 12, m_driverControll
   
   public static RobotContainer getInstance() {
     return m_robotContainer;
+  }
+  public Command getAutonomousChooser() {
+    return m_chooser.getSelected();
   }
 }

@@ -13,8 +13,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.PathWeaver;
 import frc.robot.commands.SwitchDriveMode;
+import frc.robot.subsystems.ColorSensor;
 //import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.Limelight;
 
@@ -27,7 +29,7 @@ import frc.robot.subsystems.Limelight;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private RobotContainer m_robotContainer;
-  private Field2d m_field;
+  //private Field2d m_field;
   
   /**
    * This function is run when the robot is first started up and should be used
@@ -38,10 +40,11 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our
     // autonomous chooser on the dashboard.
-    m_field = new Field2d();
-    m_field.getObject("Trajectory").setTrajectory(PathWeaver.getTrajectory("DriveToTarget"));
+    //m_field = new Field2d();
+    //m_field.getObject("Trajectory").setTrajectory(PathWeaver.getTrajectory("DriveToTarget"));
     //m_field.getObject("Trajectory").setTrajectory();
     //accidently deleted some objects such as drivetraina and shooter but robotcontainer should have it for me
+    m_robotContainer.m_drivetrain.resetAllSensors();
     m_robotContainer = RobotContainer.getInstance();
         HAL.report(tResourceType.kResourceType_Framework, tInstances.kFramework_RobotBuilder);
         m_robotContainer.m_drivetrain.switchDriveMode();
@@ -61,21 +64,24 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    SmartDashboard.putNumber("Joystick X value", RobotContainer.m_driverController.getRightX());
-    SmartDashboard.putNumber("Joystick Y value", RobotContainer.m_driverController.getLeftY());
+    SmartDashboard.putNumber("Joystick RX value", RobotContainer.m_driverController.getRightX());
+    SmartDashboard.putNumber("Joystick RY Value", -RobotContainer.m_driverController.getRightY());
+    SmartDashboard.putNumber("Joystick Y value", -RobotContainer.m_driverController.getLeftY());
     SmartDashboard.putNumber("Limelight Calculated Distance" , Limelight.calcDistance());
     SmartDashboard.putBoolean("LimelightHasValidTarget", Limelight.isTarget());
     SmartDashboard.putNumber("RightEncoderRate" , m_robotContainer.m_drivetrain.getRightEncoderRate());
     SmartDashboard.putNumber("LeftEncoderRate" , m_robotContainer.m_drivetrain.getLeftEncoderRate());
     SmartDashboard.putNumber("RightEncoderPos" , m_robotContainer.m_drivetrain.getRightEncoderPosition());
     SmartDashboard.putNumber("LeftEncoderPos" , m_robotContainer.m_drivetrain.getLeftEncoderPosition());
-    SmartDashboard.putData("Field2D", m_field);
+   // SmartDashboard.putData("Field2D", m_field);
     SmartDashboard.putNumber("Angle", m_robotContainer.m_drivetrain.getAngle());
     SmartDashboard.putNumber("Heading", m_robotContainer.m_drivetrain.getHeading());
+    SmartDashboard.putNumber("Heading2D", m_robotContainer.m_drivetrain.getHeadingR2());
     SmartDashboard.putNumber("LM Supply Current", m_robotContainer.m_drivetrain.m_leftMaster.getSupplyCurrent());
     SmartDashboard.putNumber("LS Supply Current", m_robotContainer.m_drivetrain.m_leftSlave.getSupplyCurrent());
     SmartDashboard.putNumber("RM Supply Current", m_robotContainer.m_drivetrain.m_rightMaster.getSupplyCurrent());
     SmartDashboard.putNumber("RS Supply Current", m_robotContainer.m_drivetrain.m_leftSlave.getSupplyCurrent());
+    m_robotContainer.m_colorSensor.readColor();
     //SmartDashboard.put("Wheel Speeds", m_robotContainer.m_drivetrain.getWheelSpeeds());
   }
 
@@ -89,8 +95,10 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    
+    m_robotContainer.m_timer.delay(1);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand("DriveToTarget");
-
+      //m_autonomousCommand = m_robotContainer.getAutonomousCommand("StraightLine");
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();

@@ -9,12 +9,12 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 /** Add your docs here. */
 public class Limelight {
-    private static NetworkTable limelight;
-
+   // private static NetworkTable limelight;
+/*
     public Limelight() {
         limelight = NetworkTableInstance.getDefault().getTable("limelight");
     }
-
+*/
     public void setLedMode(int num) {
         NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(num);
     }

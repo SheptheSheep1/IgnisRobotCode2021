@@ -33,8 +33,8 @@ public static final class DriveConstants {
         public static final double kDeadband = 0.05;
 
          // Speed constants
-         public static final double kDriveSpeed = .6;
-         public static final double kTurnSpeed = .6;
+         public static final double kDriveSpeed = .8;
+         public static final double kTurnSpeed = .8;
 
          public static final double cDriveSpeed = .6;
          public static final double cTurnSpeed = .6;
@@ -108,19 +108,5 @@ public static final class DriveConstants {
         public static final double kRamseteB = 2;
         public static final double kRamseteZeta = 0.7;
     }
-/*
-    public static final class PathWeaver {
-    public static Trajectory getTrajectory(String path) {
-        try {
-            String realPath = "paths/" + path + ".wpilib";
-            //"/home/lvuser/deploy/output/paths/" + path + ".wpilib.json"
-            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(realPath);
-            return TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-        } catch (IOException ex) {
-            DriverStation.reportError("Unable to open trajectory: " + path, ex.getStackTrace());
-            return null;
-        }
-    }
-    */
 }
 

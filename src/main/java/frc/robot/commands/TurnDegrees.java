@@ -17,18 +17,19 @@ public class TurnDegrees extends PIDCommand {
   public TurnDegrees(double targetAngleDegrees, Drivetrain drive) {
     super(
         // The controller that the command will use
-        new PIDController(.05, 0, 0),
+        new PIDController(.1, 0, 0),
         // This should return the measurement
         drive::getAngle,
         // This should return the setpoint (can also be a constant)
         targetAngleDegrees,
         // This uses the output may have to be negative
-        output -> { drive.arcadeDrive(0, MathUtil.clamp(output, -1, 1));
+        output -> { drive.arcadeDrive(0, MathUtil.clamp(output, -.8, .8));
           // Use the output here
         });
     // Use addRequirements() here to declare subsystem dependencies.
     getController().enableContinuousInput(-180, 180);
-    getController().setTolerance(5);
+    
+    getController().setTolerance(0);
     // Configure additional PID options by calling `getController` here.
   }
 

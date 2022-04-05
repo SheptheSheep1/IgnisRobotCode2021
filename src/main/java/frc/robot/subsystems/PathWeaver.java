@@ -27,9 +27,4 @@ public class PathWeaver {
             return null;
         }
     }
-    /*
-    public String getFilePath() {
-        return FileUtilities.getFilePath();
-    }
-    */
 }

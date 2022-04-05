@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.PhysicsConstants;
@@ -14,7 +15,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 
-public class Shooter extends SubsystemBase {
+public class Shooter extends SubsystemBase{
   /** Creates a new Shooter. */
   public final CANSparkMax m_master;
   private final CANSparkMax m_slave;

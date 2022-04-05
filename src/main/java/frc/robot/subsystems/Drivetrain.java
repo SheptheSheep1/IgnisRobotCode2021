@@ -4,12 +4,14 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
@@ -41,6 +43,8 @@ public class Drivetrain extends SubsystemBase {
   public final AHRS m_gyro;
   
   private boolean bool;
+  private Pose2d pose;
+  public Field2d m_field;
   public Drivetrain() {
     m_leftMaster = new WPI_TalonFX(DriveConstants.dtFrontLeftPort);
     m_rightMaster = new WPI_TalonFX(DriveConstants.dtFrontRightPort);
@@ -52,18 +56,19 @@ public class Drivetrain extends SubsystemBase {
 
     m_diffDrive = new DifferentialDrive(m_left, m_right);
 
-
+/*
     m_leftSlave.follow(m_leftMaster);
     m_rightSlave.follow(m_rightMaster);
-
+*/
+//Simply setting left to inverted makes it drive intake first though pathweaver is now having issues
     //Invert left side changed due to Differential drive no longer automatically inverting controllers
-    m_leftMaster.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    m_leftSlave.setInverted(false);
-    m_rightMaster.setInverted(true);
-    m_rightSlave.setInverted(true);
+    //m_leftMaster.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
+   // m_leftSlave.setInverted(false);
+    //m_rightMaster.setInverted(true);
+    //m_rightSlave.setInverted(true);
     //May have to invert the motor controllers when using voltage based output
     //m_right.setInverted(false); // CHANGE THESE UNTIL ROBOT DRIVES FORWARD
-    //m_left.setInverted(false);
+    m_left.setInverted(true);
 
     //Set mode to coast rather than brake to perserve motors
     m_rightMaster.setNeutralMode(NeutralMode.Brake);
@@ -89,9 +94,16 @@ public class Drivetrain extends SubsystemBase {
     // deadband: motors wont move if speed of motors is within deadband
     m_diffDrive.setDeadband(DriveConstants.kDeadband);
     m_gyro = new AHRS(SPI.Port.kMXP);
+    
     m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
    
     bool = true;
+
+    pose = new Pose2d();
+
+    m_field = new Field2d();
+    SmartDashboard.putData("Field", m_field);
+    //m_field.getObject("traj").setTrajectory(PathWeaver.getTrajectory("DriveToTarget"));
   }
  
   public void switchDriveMode() {
@@ -157,8 +169,8 @@ public class Drivetrain extends SubsystemBase {
 */
 
 public void tankDriveVolts(double leftVolts, double rightVolts) {
-  m_left.setVoltage(leftVolts);
-  m_right.setVoltage(rightVolts);
+  m_left.setVoltage(MathUtil.clamp(leftVolts, -2, 2));
+  m_right.setVoltage(MathUtil.clamp(rightVolts, -2, 2));
   m_diffDrive.feed();
 }
 
@@ -174,6 +186,8 @@ public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
 }
 	public double getLeftEncoderPosition() {
     // get rotations of encoder by dividing encoder counts by counts per rotation
+    return ((double) (m_leftMaster.getSelectedSensorPosition() / 2048) / 8.4) * (Math.PI * .1524);
+    /*
     double encoderRotations = m_leftMaster.getSelectedSensorPosition() / 2048;
 
     // get rotations of wheel by diving rotations of encoder by gear ratio
@@ -183,10 +197,13 @@ public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
     double distance = wheelRotations * (Math.PI * (.1524));
 
 		return distance;
+    */
 	}
 
   public double getRightEncoderPosition() {
+    return ((double) (m_leftMaster.getSelectedSensorPosition() / 2048) / 8.4) * (Math.PI * .1524);
     // get rotations of encoder by dividing encoder counts by counts per rotation
+    /*
     double encoderRotations = m_rightMaster.getSelectedSensorPosition() / 2048;
 
     // get rotations of wheel by diving rotations of encoder by gear ratio
@@ -196,6 +213,7 @@ public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
     double distance = wheelRotations * (Math.PI * (.1524));
 
 		return distance;
+    */
   }
   public double getRightEncoderRate() {
 		// get rotations of encoder by dividing encoder counts by counts per rotation
@@ -248,8 +266,12 @@ public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
   }
   //degrees -180 to 180; left should be going positive
   public double getHeading() {
-    return Math.IEEEremainder(-m_gyro.getAngle(), 360) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
-    //return m_gyro.getRotation2d().getDegrees();
+    //return Math.IEEEremainder(m_gyro.getAngle(), 360) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    return m_gyro.getRotation2d().getDegrees();
+    //return m_gyro.getRotation2d().fromDegrees(getAngle());
+  }
+  public double getHeadingR2() {
+    return m_gyro.getRotation2d().getDegrees();
   }
   public double countAngle() {
     zeroHeading();
@@ -259,6 +281,7 @@ public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
     return -m_gyro.getAngle();
   }
   public void zeroHeading() {
+    System.out.println("Gyro Reset");
     m_gyro.reset();
   }
   public double getTurnRate() {
@@ -267,11 +290,20 @@ public void tankDriveVoltsV2(double leftVolts, double rightVolts) {
   public void setMaxOutput(double maxOutput) {
     m_diffDrive.setMaxOutput(maxOutput);
   }
+  public void resetAllSensors() {
+    m_leftMaster.setSelectedSensorPosition(0);
+    m_rightMaster.setSelectedSensorPosition(0);
+    zeroHeading();
+    resetOdometry(pose);
+    System.out.println("All Sensors Reset");
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     m_odometry.update(
-      Rotation2d.fromDegrees(getHeading()), getLeftEncoderPosition(), getRightEncoderPosition());
+      m_gyro.getRotation2d(), getLeftEncoderPosition(), getRightEncoderPosition());
+      m_field.setRobotPose(m_odometry.getPoseMeters());
+      //SmartDashboard.putNumber("OdometryPoseMeters", m_odometry.get);
 }
 }
