@@ -93,10 +93,10 @@ public static final class DriveConstants {
     }
 
     public static final class HopperConstants {
-        public static final double kHopperSpeed = 0.20;
+        public static final double kHopperSpeed = 1;
 
         // SparkMAX CAN ports
-        public static final int hopperPort = 4;
+        public static final int hopperPort = 12;
 
         // Solenoid ports
         public static final int hopperSolenoid = 3;

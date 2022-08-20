@@ -7,28 +7,28 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.HopperConstants;
 
 public class Hopper extends SubsystemBase {
   /** Creates a new Hopper. */
   public final CANSparkMax m_hopperMotor;
-  //private final Solenoid m_hopperPiston;
+  private final Solenoid m_hopperPiston;
 
   public Hopper() {
-    m_hopperMotor = new CANSparkMax(12, MotorType.kBrushless);
-    //m_hopperPiston = new Solenoid(HopperConstants.hopperSolenoid);
+    m_hopperMotor = new CANSparkMax(HopperConstants.hopperPort, MotorType.kBrushless);
+    m_hopperPiston = new Solenoid(PneumaticsModuleType.CTREPCM, HopperConstants.hopperSolenoid);
   }
 
   public void setHopper(double speed) {
     m_hopperMotor.set(speed);
   }
-
   // using a single solenoid as double solenoid
-  /*
   public void toggleSolenoid() {
     m_hopperPiston.toggle();
   }
-*/
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
