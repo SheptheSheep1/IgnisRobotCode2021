@@ -56,6 +56,7 @@ public static final class DriveConstants {
 }
 
     public static final class ShooterConstants {
+        public static final double kManualPwr = .9;
         public static final int shooterFirstPort = 9;
         public static final int shooterSecondPort = 4;
         public static final double kNeoRPM = 5880;
