@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.HopperConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.PathWeaver;
 import frc.robot.commands.Auto;
 import frc.robot.commands.DriveDistance;
@@ -173,18 +174,20 @@ m_drivetrain.tankDriveVolts(-m_driverController.getLeftY() * 12, -m_driverContro
     new JoystickButton(m_driverController, Button.kRightBumper.value)
     .whenPressed(new RunCommand(() -> m_shooter.manualSpinMotor(1), m_shooter))
     .whenReleased(new RunCommand(() -> m_shooter.manualSpinMotor(0), m_shooter));
-    /*
+    
     //Intake System
     new JoystickButton(m_driverController, Button.kB.value)
+                        .whenPressed(() -> m_intake.retractIntake(), m_hopper)
                         .whileHeld(() -> {
                                 m_intake.setIntake(IntakeConstants.kIntakeSpeed);
-                                m_hopper._setHopper(HopperConstants.kHopperSpeed);
+                                m_hopper.setHopper(HopperConstants.kHopperSpeed);
                         }, m_intake, m_hopper)
                         .whenReleased(() -> {
                                 m_intake.setIntake(0);
                                 m_hopper.setHopper(0);
+                                m_intake.retractIntake();
                         }, m_intake, m_hopper);
-                        */
+                        
   //Hopper System
   //May have to input solenoid boolean values, I don't think so
   new JoystickButton(m_driverController, Button.kX.value)
